@@ -79,17 +79,14 @@ struct Packstream {
         return avg / count;
     }
 
-    //计算平均排队时间 (st - at)
-    double avg_queue_wait() {
-        double avg = 0;
-//        for (int i = 0; i < length; i++) {
+//    //计算平均排队时间 (st - at)
+//    double avg_queue_wait() {
+//        double avg = 0;
+//        for (int i = 0; i < count; i++) {
 //            avg += Packs[i].st - Packs[i].at;
 //        }
-        for (int i = 0; i < count; i++) {
-            avg += Packs[i].st - Packs[i].at;
-        }
-        return avg / count;
-    }
+//        return avg / count;
+//    }
 
     //计算平均队列长度 （st和at来计算）
     double avg_queue_length(const string &textName) {
@@ -190,7 +187,7 @@ struct Server {
             if (p.front().at <= currentTime) {
                 //处理，更新相关的参数
                 if (time + serveTime > myServerTime) { //已经处理不完了
-                    p.deficit += myServerTime - serveTime;
+                    p.deficit = myServerTime - serveTime;
                     break;
                 }
                 p.front().st = currentTime;//开始处理时间
@@ -202,7 +199,7 @@ struct Server {
                 p.count++;
                 p.index++;
             } else {
-                p.deficit += myServerTime - serveTime;
+                //如果没有包到达的话就不算赤字了？
                 break;
             }
         }
@@ -212,9 +209,9 @@ struct Server {
 void run1(Packstream &p1, Packstream &p2, Packstream &p3, Server server);
 
 int main() {
-    Packstream p1(2, Total);
-    Packstream p2(3, Total);
-    Packstream p3(4, Total);
+    Packstream p1(3, Total);
+    Packstream p2(2, Total);
+    Packstream p3(5, Total);
     Server server(10, 1);
     run1(p1, p2, p3, server);
     return 0;
@@ -251,6 +248,10 @@ void run1(Packstream &p1, Packstream &p2, Packstream &p3, Server server) {
     cout << "p1: " << p1.avg_queue_length("d:\\mt\\p1_avg_queue_l.txt") << endl;
     cout << "p2: " << p2.avg_queue_length("d:\\mt\\p2_avg_queue_l.txt") << endl;
     cout << "p3: " << p3.avg_queue_length("d:\\mt\\p3_avg_queue_l.txt") << endl;
+    cout<<"剩余赤字:"<<endl;
+    cout << "p1: " << p1.deficit<< endl;
+    cout << "p2: " << p2.deficit << endl;
+    cout << "p3: " << p3.deficit << endl;
     cout << "分别服务的包数:" << endl;
     cout << "p1: " << p1.count << endl;
     cout << "p2: " << p2.count << endl;
